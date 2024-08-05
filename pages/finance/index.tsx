@@ -10,10 +10,45 @@ const Finance: NextPage = () => {
     const supabaseClient = useSupabaseClient();
     const user = useUser();
     const router = useRouter();
+    const [transactionsData, setTransactionsData] = useState <any>([]); // keep track of data from supabase 
     const [finance, setFinance] = useState<any>({});
 
     const { id } = router.query;
 
+    const fetchTransactions = async () => {
+        try {
+          const { data, error } = await supabaseClient
+          .from("personalfinance")
+          .select("amount,category");
+        if (error) {
+          console.error(error);
+          return;
+        } setTransactionsData(data)
+         // console.log(data)
+        } catch (error) {
+          console.log(error)
+          
+        }
+    
+      
+    
+      };
+      function getBalance(transactionsdata: any[]) { //use data from supabase
+        const expenseData = transactionsdata.filter((transaction) => transaction.category === 'expenses'); //get all exp
+        const incomeData = transactionsdata.filter((transaction) => transaction.category === 'incomes'); // get all income
+      
+        const totalExpenses = expenseData.reduce((acc, current) => acc + parseFloat(current.amount.replace('$', '').replace(',' , '')), 0); // start w total iri 0 ,
+      //per array item in expenses remove dollar sign
+      //add value to  the current total
+        const totalIncomes = incomeData.reduce((acc, current) => acc + parseFloat(current.amount.replace('$', '').replace(',' , '')), 0);
+      
+        const balance = totalIncomes - totalExpenses;
+        return parseFloat(balance.toFixed(2))
+      
+      
+      }
+     
+       
     useEffect( () => {
         async function getFinance() {
             const {data, error} = await supabaseClient
@@ -32,6 +67,10 @@ const Finance: NextPage = () => {
         }
     }, [id])
 
+    useEffect(() => {
+        fetchTransactions();
+      }, []);
+
     const deleteFinance = async () => {
         try {
             const { data, error } = await supabaseClient
@@ -49,7 +88,7 @@ const Finance: NextPage = () => {
         <>
             <Spacer y={1} />
             <Text size="$lg">
-                {finance.account_balance}
+                ${getBalance(transactionsData).toFixed(2)}
             </Text>
             <Spacer y={1} />
             <Text h1 size="$lg">

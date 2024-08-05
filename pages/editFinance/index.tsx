@@ -39,22 +39,26 @@ const editFinance:NextPage = () => {
         return parseFloat(balance.toFixed(2))
 
 }
+  async function fetchTransactions()  {
+  try {
+    const { data, error } = await supabaseClient
+    .from("personalfinance")
+    .select("amount,category");
+  if (error) {
+    console.error(error);
+    return;
+  } setTransactionsData(data)
+   // console.log(data)
+  } catch (error) {
+    console.log(error)
     
-        async function fetchTransactions() {
-            const {data, error} = await supabaseClient
-                .from("personalfinance")
-                .select("*")
-                .filter("id", "eq", id)
-                .single();
-            if (error) {
-                console.log(error);
-            } else {
-                setFinanceData(data);
-            }
-        }
-        if(typeof id !== "undefined") {
-           fetchTransactions
-         }; [id]
+  }
+
+
+
+};
+    
+
     const editFinance = async () =>{
        try {
         const { data, error} = await supabaseClient
@@ -80,10 +84,33 @@ const editFinance:NextPage = () => {
        }
 
     }
+    //Get data re a  single transaction 
+    async function getFinance() {
+      const {data, error} = await supabaseClient
+          .from("personalfinance")
+          .select("*")
+          .filter("id", "eq", id)
+          .single();
+      if (error) {
+          console.log(error);
+      } else {
+          setFinanceData(data);
+      }
+  }
+    
+      useEffect( () => { // this use effect will work when you load data
+        getFinance()
+        if(typeof id !== "undefined") {
+            getFinance();
+        }
+    }, [id])
 
-    useEffect( () => {
-      fetchTransactions }
-      ,[])
+    useEffect(() => { // this use effect will get all transactions when you load the page and calculate balance
+      console.log(transactionsData)
+        fetchTransactions()
+        console.log(transactionsData)
+    }, [])
+    
 
    // console.log(financeData);
 
