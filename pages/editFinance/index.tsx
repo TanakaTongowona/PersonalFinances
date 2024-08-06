@@ -69,7 +69,7 @@ const editFinance:NextPage = () => {
                      transaction: financeData.transaction,
                      category: financeData.category,
                      amount: financeData.amount,
-                     account_balance: financeData.account_balance,
+                     account_balance: balance,
                     
 
                 }
